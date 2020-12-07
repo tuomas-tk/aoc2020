@@ -4,7 +4,7 @@ import Data.Maybe(fromJust)
 
 getInput :: IO [String]
 getInput = do
-  lines <$> readFile "input2.txt"
+  lines <$> readFile "input.txt"
 
 type Bag = (String, [InnerBag])
 type InnerBag = (Int, String)
@@ -26,7 +26,13 @@ parseLine line =
 
 getInnerBags :: [Bag] -> String -> String -> [String]
 getInnerBags allBags topBag name =
-    (concat $ map (getInnerBags allBags topBag) $ filter (/=topBag) $ map snd $ fromJust $ lookup name allBags) ++ [name]
+    ( concat
+      $ map (getInnerBags allBags topBag)
+      -- $ filter (/=topBag)
+      $ map snd
+      $ fromJust
+      $ lookup name allBags
+    ) ++ [name]
 
 containsBag :: String -> [String] -> Bool
 containsBag name contents = any (==name) contents
@@ -35,13 +41,9 @@ main :: IO ()
 main = do
   input <- getInput
   let bags = map parseLine input
-  let bagsWithFlatContents = map (\(name, _) -> (name, getInnerBags bags name name)) bags
-  {-print
-    $ length
-    $ filter ((/= "shinygold") . fst)
-    $ filter (\(_, contents) -> containsBag "shinygold" contents)
-    $ bagsWithFlatContents-}
-
   print
-    $ fromJust
-    $ lookup "shinygold" bagsWithFlatContents
+    $ length
+    $ filter (\(_, contents) -> containsBag "shinygold" contents)
+    $ map (\(name, _) -> (name, getInnerBags bags name name))
+    $ filter ((/= "shinygold") . fst)
+    $ bags
